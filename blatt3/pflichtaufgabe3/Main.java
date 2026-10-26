@@ -1,3 +1,6 @@
-void main(){
-    // Ab hier soll die main-Methode, wie auf dem Aufgabenblatt beschrieben, implementiert werden.
-} 
+public class Main{
+    // Ab hier soll alles wie auf dem Aufgabenblatt beschrieben implementiert werden.
+    static void main(){
+        
+    } 
+}

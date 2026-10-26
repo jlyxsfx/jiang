@@ -1,0 +1,479 @@
+stages:
+  - build
+  - test
+  - lint
+
+default:
+  # OpenJDK images have been deprecated
+  image: maven:3.9-eclipse-temurin-25-noble
+
+# BEGIN Tooling setup
+.prepare_checkstyle: &prepare_checkstyle
+    - |
+      mkdir -p .cache/checkstyle
+      if [ ! -f .cache/checkstyle/checkstyle.jar ]; then
+        curl -L -o .cache/checkstyle/checkstyle.jar "https://github.com/checkstyle/checkstyle/releases/download/checkstyle-14.3.0/checkstyle-14.3.0-all.jar";
+      fi
+      # Write the checkstyle config to a shared cache in case it's not there
+      if [ ! -f .cache/checkstyle/checkstyle.xml ]; then
+        echo '<?xml version="1.0"?>
+        <!DOCTYPE module PUBLIC
+            "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+            "https://checkstyle.org/dtds/configuration_1_3.dtd">
+
+        <module name="Checker">
+            <property name="charset" value="UTF-8"/>
+
+            <module name="TreeWalker">
+                <module name="TypeName"/>
+                <module name="MethodName"/>
+                <module name="ParameterName"/>
+                <module name="LocalVariableName"/>
+                <module name="MemberName"/>
+                <module name="PackageName"/>
+
+                <module name="Indentation">
+                    <property name="basicOffset" value="4"/>
+                    <property name="braceAdjustment" value="0"/>
+                    <property name="caseIndent" value="4"/>
+                    <property name="tabWidth" value="4"/>
+                </module>
+            </module>
+        </module>' > .cache/checkstyle/checkstyle.xml;
+      fi
+
+.prepare_tests: &prepare_tests
+    - |
+      mkdir -p .cache/tests
+      if [ ! -f .cache/tests/tests.jar ]; then
+        # This needs to be updated whenever the test tool version changes
+        curl -L -o .cache/tests/tests.jar "https://gitlab.ibr.cs.tu-bs.de/prog1/ws2627/abgaben/testfile/-/raw/master/Prog1Tests-2.0.1-all.jar?inline=false";
+      fi
+# END Tooling setup
+
+# BEGIN Build stages (all stage: build tasks run at the same time)
+# This can probably be rewritten to use run steps, but those aren't stable yet
+compile_blatt_1:
+  stage: build
+  # Only execute runner when this exercise has changes
+  rules:
+    # Only run on the default branch (aka main)
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: never
+    - changes:
+        paths:
+          - blatt1/**/*.java
+  script:
+    - javac -cp blatt1/pflichtaufgabe3/ blatt1/pflichtaufgabe3/Main.java;
+    - echo "Pflichtaufgabe 3 Compiled";
+    - javac -cp blatt1/pflichtaufgabe4/ blatt1/pflichtaufgabe4/Main.java;
+    - echo "Pflichtaufgabe 4 Compiled";
+  artifacts:
+    paths:
+      - blatt1/**/*
+    exclude:
+      - blatt1/**/*.java
+    expire_in: 20 minutes
+
+compile_blatt_2:
+  stage: build
+  rules:
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: never
+    - changes:
+        paths:
+          - blatt2/**/*.java
+  script:
+    - javac -cp blatt2/pflichtaufgabe3/ blatt2/pflichtaufgabe3/Main.java;
+    - echo "Pflichtaufgabe 3 Compiled";
+    - javac -cp blatt2/pflichtaufgabe4/ blatt2/pflichtaufgabe4/Main.java;
+    - echo "Pflichtaufgabe 4 Compiled";
+  artifacts:
+    paths:
+      - blatt2/**/*
+    exclude:
+      - blatt2/**/*.java
+    expire_in: 20 minutes
+
+compile_blatt_3:
+  stage: build
+  rules:
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: never
+    - changes:
+        paths:
+          - blatt3/**/*.java
+  script:
+    - javac -cp blatt3/pflichtaufgabe3/ blatt3/pflichtaufgabe3/Main.java;
+    - echo "Pflichtaufgabe 3 Compiled";
+    - javac -cp blatt3/pflichtaufgabe4/ blatt3/pflichtaufgabe4/Main.java;
+    - echo "Pflichtaufgabe 4 Compiled";
+  artifacts:
+    paths:
+      - blatt3/**/*
+    exclude:
+      - blatt3/**/*.java
+    expire_in: 20 minutes
+
+compile_blatt_4:
+  stage: build
+  rules:
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: never
+    - changes:
+        paths:
+          - blatt4/**/*.java
+  script:
+    - javac -cp blatt4/pflichtaufgabe3/ blatt4/pflichtaufgabe3/Main.java;
+    - echo "Pflichtaufgabe 3 Compiled";
+    - javac -cp blatt4/pflichtaufgabe4/ blatt4/pflichtaufgabe4/Main.java;
+    - echo "Pflichtaufgabe 4 Compiled";
+  artifacts:
+    paths:
+      - blatt4/**/*
+    exclude:
+      - blatt4/**/*.java
+    expire_in: 20 minutes
+
+compile_blatt_5:
+  stage: build
+  rules:
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: never
+    - changes:
+        paths:
+          - blatt5/**/*.java
+  script:
+    - javac -cp blatt5/pflichtaufgabe3/ blatt5/pflichtaufgabe3/Main.java;
+    - echo "Pflichtaufgabe 3 Compiled";
+    - javac -cp blatt5/pflichtaufgabe4/ blatt5/pflichtaufgabe4/Main.java;
+    - echo "Pflichtaufgabe 4 Compiled";
+  artifacts:
+    paths:
+      - blatt5/**/*
+    exclude:
+      - blatt5/**/*.java
+    expire_in: 20 minutes
+# END Build stages
+
+# BEGIN Test stages
+test_blatt_1_aufgabe_3:
+  stage: test
+  rules:
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: never
+    - changes:
+        paths:
+          - blatt1/pflichtaufgabe3/**/*.java
+  cache:
+    # Change the cache key on all test runs if the test tool version changes
+    # This is to invalidate the cache!
+    key: "prog-1-tests-shared_v1.7"
+    paths:
+      - .cache/tests/tests.jar
+    policy: pull-push
+  script:
+    #- *prepare_tests
+    - java -jar .cache/tests/tests.jar blatt1/pflichtaufgabe3/ 1 3
+  needs:
+    - job: compile_blatt_1
+      artifacts: true
+
+test_blatt_1_aufgabe_4:
+  stage: test
+  rules:
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: never
+    - changes:
+        paths:
+          - blatt1/pflichtaufgabe4/**/*.java
+  cache:
+    key: "prog-1-tests-shared_v1.7"
+    paths:
+      - .cache/tests/tests.jar
+    policy: pull-push
+  script:
+    - *prepare_tests
+    - java -jar .cache/tests/tests.jar blatt1/pflichtaufgabe4/ 1 4
+  needs:
+    - job: compile_blatt_1
+      artifacts: true
+
+test_blatt_2_aufgabe_3:
+  stage: test
+  rules:
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: never
+    - changes:
+        paths:
+          - blatt2/pflichtaufgabe3/**/*.java
+  cache:
+    key: "prog-1-tests-shared_v1.7"
+    paths:
+      - .cache/tests/tests.jar
+    policy: pull-push
+  script:
+    - *prepare_tests
+    - java -jar .cache/tests/tests.jar blatt2/pflichtaufgabe3/ 2 3
+  needs:
+    - job: compile_blatt_2
+      artifacts: true
+
+test_blatt_2_aufgabe_4:
+  stage: test
+  rules:
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: never
+    - changes:
+        paths:
+          - blatt2/pflichtaufgabe4/**/*.java
+  cache:
+    key: "prog-1-tests-shared_v1.7"
+    paths:
+      - .cache/tests/tests.jar
+    policy: pull-push
+  script:
+    - *prepare_tests
+    - java -jar .cache/tests/tests.jar blatt2/pflichtaufgabe4/ 2 4
+  needs:
+    - job: compile_blatt_2
+      artifacts: true
+
+test_blatt_3_aufgabe_3:
+  stage: test
+  rules:
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: never
+    - changes:
+        paths:
+          - blatt3/pflichtaufgabe3/**/*.java
+  cache:
+    key: "prog-1-tests-shared_v1.7"
+    paths:
+      - .cache/tests/tests.jar
+    policy: pull-push
+  script:
+    - *prepare_tests
+    - java -jar .cache/tests/tests.jar blatt3/pflichtaufgabe3/ 3 3
+  needs:
+    - job: compile_blatt_3
+      artifacts: true
+
+test_blatt_3_aufgabe_4:
+  stage: test
+  rules:
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: never
+    - changes:
+        paths:
+          - blatt3/pflichtaufgabe4/**/*.java
+  cache:
+    key: "prog-1-tests-shared_v1.7"
+    paths:
+      - .cache/tests/tests.jar
+    policy: pull-push
+  script:
+    - *prepare_tests
+    - java -jar .cache/tests/tests.jar blatt3/pflichtaufgabe4/ 3 4
+  needs:
+    - job: compile_blatt_3
+      artifacts: true
+
+test_blatt_4_aufgabe_3:
+  stage: test
+  rules:
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: never
+    - changes:
+        paths:
+          - blatt4/pflichtaufgabe3/**/*.java
+  cache:
+    key: "prog-1-tests-shared_v1.7"
+    paths:
+      - .cache/tests/tests.jar
+    policy: pull-push
+  script:
+    - *prepare_tests
+    - java -jar .cache/tests/tests.jar blatt4/pflichtaufgabe3/ 4 3
+  needs:
+    - job: compile_blatt_4
+      artifacts: true
+
+test_blatt_4_aufgabe_4:
+  stage: test
+  rules:
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: never
+    - changes:
+        paths:
+          - blatt4/pflichtaufgabe4/**/*.java
+  cache:
+    key: "prog-1-tests-shared_v1.7"
+    paths:
+      - .cache/tests/tests.jar
+    policy: pull-push
+  script:
+    - *prepare_tests
+    - java -jar .cache/tests/tests.jar blatt4/pflichtaufgabe4/ 4 4
+  needs:
+    - job: compile_blatt_4
+      artifacts: true
+
+test_blatt_5_aufgabe_3:
+  stage: test
+  rules:
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: never
+    - changes:
+        paths:
+          - blatt5/pflichtaufgabe3/**/*.java
+  cache:
+    key: "prog-1-tests-shared_v1.7"
+    paths:
+      - .cache/tests/tests.jar
+    policy: pull-push
+  script:
+    - *prepare_tests
+    - java -jar .cache/tests/tests.jar blatt5/pflichtaufgabe3/ 5 3
+  needs:
+    - job: compile_blatt_5
+      artifacts: true
+
+test_blatt_5_aufgabe_4:
+  stage: test
+  rules:
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: never
+    - changes:
+        paths:
+          - blatt5/pflichtaufgabe4/**/*.java
+  cache:
+    key: "prog-1-tests-shared_v1.7"
+    paths:
+      - .cache/tests/tests.jar
+    policy: pull-push
+  script:
+    - *prepare_tests
+    - java -jar .cache/tests/tests.jar blatt5/pflichtaufgabe4/ 5 4
+  needs:
+    - job: compile_blatt_5
+      artifacts: true
+# END Test stages
+
+# BEGIN Lint stages (these can fail without failing the full pipeline)
+lint_blatt_1:
+  stage: lint
+  rules:
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: never
+    - changes:
+        paths:
+          - blatt1/**/*.java
+  cache:
+    key: "prog-1-checkstyle-shared"
+    paths:
+      - .cache/checkstyle/checkstyle.jar
+      - .cache/checkstyle/checkstyle.xml
+    policy: pull-push
+  # Allow lints to fail without failing the pipeline
+  allow_failure: true
+  script:
+    - *prepare_checkstyle
+    - java -jar .cache/checkstyle/checkstyle.jar -c .cache/checkstyle/checkstyle.xml $(find blatt1/pflichtaufgabe3 -name "*.java")
+    - echo "Lint done for Pflichtaufgabe 3";
+    - java -jar .cache/checkstyle/checkstyle.jar -c .cache/checkstyle/checkstyle.xml $(find blatt1/pflichtaufgabe4 -name "*.java")
+    - echo "Lint done for Pflichtaufgabe 4";
+  needs: []
+
+lint_blatt_2:
+  stage: lint
+  rules:
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: never
+    - changes:
+        paths:
+          - blatt2/**/*.java
+  cache:
+    key: "prog-1-checkstyle-shared"
+    paths:
+      - .cache/checkstyle/checkstyle.jar
+      - .cache/checkstyle/checkstyle.xml
+    policy: pull-push
+  allow_failure: true
+  script:
+    - *prepare_checkstyle
+    - java -jar .cache/checkstyle/checkstyle.jar -c .cache/checkstyle/checkstyle.xml $(find blatt2/pflichtaufgabe3 -name "*.java")
+    - echo "Lint done for Pflichtaufgabe 3";
+    - java -jar .cache/checkstyle/checkstyle.jar -c .cache/checkstyle/checkstyle.xml $(find blatt2/pflichtaufgabe4 -name "*.java")
+    - echo "Lint done for Pflichtaufgabe 4";
+  needs: []
+
+lint_blatt_3:
+  stage: lint
+  rules:
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: never
+    - changes:
+        paths:
+          - blatt3/**/*.java
+  cache:
+    key: "prog-1-checkstyle-shared"
+    paths:
+      - .cache/checkstyle/checkstyle.jar
+      - .cache/checkstyle/checkstyle.xml
+    policy: pull-push
+  allow_failure: true
+  script:
+    - *prepare_checkstyle
+    - java -jar .cache/checkstyle/checkstyle.jar -c .cache/checkstyle/checkstyle.xml $(find blatt3/pflichtaufgabe3 -name "*.java")
+    - echo "Lint done for Pflichtaufgabe 3";
+    - java -jar .cache/checkstyle/checkstyle.jar -c .cache/checkstyle/checkstyle.xml $(find blatt3/pflichtaufgabe4 -name "*.java")
+    - echo "Lint done for Pflichtaufgabe 4";
+  needs: []
+
+lint_blatt_4:
+  stage: lint
+  rules:
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: never
+    - changes:
+        paths:
+          - blatt4/**/*.java
+  cache:
+    key: "prog-1-checkstyle-shared"
+    paths:
+      - .cache/checkstyle/checkstyle.jar
+      - .cache/checkstyle/checkstyle.xml
+    policy: pull-push
+  allow_failure: true
+  script:
+    - *prepare_checkstyle
+    - java -jar .cache/checkstyle/checkstyle.jar -c .cache/checkstyle/checkstyle.xml $(find blatt4/pflichtaufgabe3 -name "*.java")
+    - echo "Lint done for Pflichtaufgabe 3";
+    - java -jar .cache/checkstyle/checkstyle.jar -c .cache/checkstyle/checkstyle.xml $(find blatt4/pflichtaufgabe4 -name "*.java")
+    - echo "Lint done for Pflichtaufgabe 4";
+  needs: []
+
+lint_blatt_5:
+  stage: lint
+  rules:
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: never
+    - changes:
+        paths:
+          - blatt5/**/*.java
+  cache:
+    key: "prog-1-checkstyle-shared"
+    paths:
+      - .cache/checkstyle/checkstyle.jar
+      - .cache/checkstyle/checkstyle.xml
+    policy: pull-push
+  allow_failure: true
+  script:
+    - *prepare_checkstyle
+    - java -jar .cache/checkstyle/checkstyle.jar -c .cache/checkstyle/checkstyle.xml $(find blatt5/pflichtaufgabe3 -name "*.java")
+    - echo "Lint done for Pflichtaufgabe 3";
+    - java -jar .cache/checkstyle/checkstyle.jar -c .cache/checkstyle/checkstyle.xml $(find blatt5/pflichtaufgabe4 -name "*.java")
+    - echo "Lint done for Pflichtaufgabe 4";
+  needs: []
+# END Lint stages
