@@ -173,7 +173,7 @@ test_blatt_1_aufgabe_3:
       - .cache/tests/tests.jar
     policy: pull-push
   script:
-    #- *prepare_tests
+    - *prepare_tests
     - java -jar .cache/tests/tests.jar blatt1/pflichtaufgabe3/ 1 3
   needs:
     - job: compile_blatt_1
