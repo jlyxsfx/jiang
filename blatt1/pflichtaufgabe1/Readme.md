@@ -16,5 +16,9 @@ Bachelor of Science
 
 c)
 
+git add blatt1/pflichtaufgabe1/Readme.md
+
+git commit -m "Readme hinzugefügt"
+
 git push
 
