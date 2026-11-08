@@ -15,10 +15,20 @@
  * Berechne die alternierende summe und setze den Return-Wert auf den gewünschten Wert.
  */
 int alternateSum(int n){
-    // TODO: Implementiere hier die alternierende Summe, wie auf Blatt 1 beschrieben.
-    return 0;
+    if (n < 1) {
+        return 0;
+    }
+    int sum = 0;
+    for (int i = 1; i <= n; i++) {
+        if (i % 2 == 1) {
+            sum += i;
+        } else {
+            sum -= i;
+        }
+    }
+    return sum;
 }
-void main() {      
+void main() {
     int inputNumber = Integer.parseInt(IO.readln("Bitte Zahl eingeben: "));
     IO.println("Die alternierende Summe von 1 bis " + inputNumber + " ist: " + alternateSum(inputNumber));
 }
