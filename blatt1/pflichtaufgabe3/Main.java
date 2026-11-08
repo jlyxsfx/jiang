@@ -13,10 +13,19 @@
  * Bestimme das Grußwort und setze den Return-Wert auf den gewünschten Wert.
  */
 String greet(int hour){
-    //TODO: Implementiere hier das Grußwort, wie auf Blatt 1 beschrieben.
-    return "";
+    if (hour < 1 || hour > 24) {
+        return "Der Wert " + hour + " ist keine gültige Stunde.";
+    } else if (hour >= 6 && hour <= 10) {
+        return "Guten Morgen";
+    } else if (hour >= 11 && hour <= 17) {
+        return "Guten Tag";
+    } else if (hour >= 18 && hour <= 21) {
+        return "Guten Abend";
+    } else {
+        return "Gute Nacht";
+    }
 }
-
+ 
 void main(){
     int inputNumber = Integer.parseInt(IO.readln("Bitte gib eine Zahl ein: "));
     IO.println(greet(inputNumber));
