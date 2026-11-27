@@ -1,11 +1,16 @@
 // Aufgabe 3a:
 int[] reverseArray(int[] numbers){
     if (numbers != null){
-        int[] result = new int[numbers.length];
+        int[] reversed = new int[numbers.length];
         for (int i = 0; i < numbers.length; i++){
-            result[numbers.length -1 - i] = numbers[i];
+            reversed[i] = numbers[i];
         }
-        return result;
+        for (int i = 0; i < reversed.length / 2; i++){
+            int next = reversed[reversed.length - 1 - i];
+            reversed[reversed.length - 1 - i] = reversed[i];
+            reversed[i] = next;
+        }
+        return reversed;
     }
     return null;
 }
@@ -15,15 +20,25 @@ int[] filterEven(int[] numbers){
     if (numbers == null || numbers.length == 0){
         return new int[0];
     }
-    int[] result = new int[countEven(numbers)];
-    int j = 0;
-    for (int i = 0; i < numbers.length; i++){
-        if (numbers[i] % 2 == 0){
-            result[j] = numbers[i];
-            j++;
+    if (numbers.length > 0){
+        int count = 0;
+        for (int num : numbers){
+            if (num % 2 != 0){
+                continue;
+            }
+            count++;
         }
+        int[] even = new int[count];
+        int index = 0;
+        for (int num : numbers){
+            if (num % 2 == 0){
+                even[index] = num;
+                index++;
+            }
+        }
+        return even;
     }
-    return result;
+    return null;
 }
 
 void printArray(int[] array){
@@ -36,14 +51,15 @@ void printArray(int[] array){
     }
 }
 
-int countEven(int[] array){
-    int count = 0;
-    for (int num : array){
-        if (num % 2 == 0){
-            count++;
-        }
+void printResult(String label, int[] array){
+    IO.print(label);
+    if (array == null){
+        IO.print("null");
+    } else if (array.length == 0){
+        IO.print("{}");
+    } else {
+        printArray(array);
     }
-    return count;
 }
 
 void main(){
@@ -54,11 +70,8 @@ void main(){
         {}
     };
     for (int[] arr : arrays){
-        IO.print("Original: ");
-        printArray(arr);
-        IO.print("reverseArray: ");
-        printArray(reverseArray(arr));
-        IO.print("filterEven: ");
-        printArray(filterEven(arr));
+        printResult("Eingabe:       ", arr);
+        printResult("reverseArray:  ", reverseArray(arr));
+        printResult("filterEven:    ", filterEven(arr));
     }
 }
