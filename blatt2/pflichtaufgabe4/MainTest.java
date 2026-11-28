@@ -14,5 +14,4 @@ void averageC1Test(){
 void main(){
     averageC0Test();
     averageC1Test();
-    IO.println("Alle Tests erfolgreich.");
 }
