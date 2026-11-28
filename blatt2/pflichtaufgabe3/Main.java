@@ -54,9 +54,9 @@ void printArray(int[] array){
 void printResult(String label, int[] array){
     IO.print(label);
     if (array == null){
-        IO.print("null");
+        IO.println("null");
     } else if (array.length == 0){
-        IO.print("{}");
+        IO.println("{}");
     } else {
         printArray(array);
     }
